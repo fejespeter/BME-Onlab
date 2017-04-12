@@ -181,6 +181,32 @@ void setColumColor(int index,int full,uint8_t g, uint8_t r, uint8_t b)
 
 }
 
+void setColumColorPowering(int index,int full,uint8_t g, uint8_t r, uint8_t b)
+{
+	int act = 0;
+	for(act = 0; act < full ; act++)
+	{
+		  colors[(index*27 + act*3)] = g;
+
+		  colors[(index*27 + act*3)+1] = r+act;
+
+		  colors[(index*27 + act*3)+2] = b;
+
+	}
+
+	for(act = full; act < 9 ; act++)
+	{
+		  colors[(index*27 + act*3)] = 0;
+
+		  colors[(index*27 + act*3)+1] = 0;
+
+		  colors[(index*27 + act*3)+2] = 0;
+
+	}
+
+}
+
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -208,8 +234,6 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  	int a = 0;
-	int b = 0;
 	setColor(0,0,0);
 
   /* USER CODE END 2 */
@@ -221,7 +245,7 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-		HAL_Delay(300);
+		HAL_Delay(60);
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
 		writeLed();
@@ -241,19 +265,12 @@ int main(void)
 		HAL_ADC_Start_IT(&hadc1);
 
 		int col = (erosites-500) / 270 ;
-		if(col<0 ){col=0;}
-		if(col>9){col=9;}
 
-		setColumColor(0,col,0,0,5);
-		setColumColor(1,col,2,0,1);
-		setColumColor(2,col,2,6,0);
-		setColumColor(3,col,1,3,3);
-		setColumColor(4,col,5,0,2);
-		setColumColor(5,col,5,0,2);
-
-		a++; b++;
-		if(a>7) a=4;
-		if(b>8) b=2;
+		if(col>0&&col<10){
+		setColumColorPowering(0,col,0,0,5);
+		setColumColorPowering(1,col,0,0,5);
+		setColumColorPowering(2,col,0,0,5);
+		}
 
 
 

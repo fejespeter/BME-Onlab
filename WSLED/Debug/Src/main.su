@@ -1,8 +1,0 @@
-main.c:64:6:writeLed	1320	static
-main.c:97:6:resetLed	112	static
-main.c:110:6:setColor	20	static
-main.c:131:6:setLedColorAt	16	static
-main.c:141:6:setColumColor	20	static
-main.c:240:6:SystemClock_Config	96	static
-main.c:168:5:main	80	static
-main.c:373:6:Error_Handler	0	static
