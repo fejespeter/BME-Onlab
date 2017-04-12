@@ -1,1 +1,4 @@
 *.o
+*.elf
+WSLED/Debug/WSLED.elf.list
+WSLED/Debug/WSLED.map
