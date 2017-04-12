@@ -40,6 +40,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 
 SPI_HandleTypeDef hspi2;
 
@@ -47,14 +48,16 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define LED_COUNT 54
-#define COLOR_COUNT 54*3
+#define LED_COUNT 27
+#define COLOR_COUNT 27*3
 static uint8_t colors[COLOR_COUNT];
 
 uint16_t ADC_raw;
 uint16_t erosites;
 uint8_t printbuffer[50];
 uint8_t adc_flag = 0;
+
+uint16_t adcValue[1024];
 
 
 /* USER CODE END PV */
@@ -63,6 +66,7 @@ uint8_t adc_flag = 0;
 void SystemClock_Config(void);
 void Error_Handler(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_ADC1_Init(void);
 static void MX_UART4_Init(void);
@@ -74,7 +78,7 @@ static void MX_UART4_Init(void);
 
 /* USER CODE BEGIN 0 */
 
-
+/*
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 	if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC)) {
 
@@ -84,7 +88,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 
 	}
 }
-
+*/
 
 
 
@@ -202,15 +206,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
   MX_UART4_Init();
 
   /* USER CODE BEGIN 2 */
 
-  	int a = 0;
-	int b = 0;
-	setColor(0,0,0);
+  	   HAL_ADC_Start_DMA(&hadc1, adcValue, 1024);
+
+  	  setColor(0,0,0);
+
 
   /* USER CODE END 2 */
 
@@ -221,15 +227,16 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-		HAL_Delay(300);
+		HAL_Delay(100);
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
+		setColor(0,0,2);
 		writeLed();
 
 		//resetLed();
 
 
-
+/*
 		if (adc_flag == 1) {
 			adc_flag = 0;
 			sprintf(printbuffer, "AD=%d\r\n", erosites/360);
@@ -238,22 +245,19 @@ int main(void)
 
 
 		}
+
+
 		HAL_ADC_Start_IT(&hadc1);
 
-		int col = (erosites-500) / 270 ;
-		if(col<0 ){col=0;}
-		if(col>9){col=9;}
 
+		int col = 5;
+
+		if(col>0 && col<10){
 		setColumColor(0,col,0,0,5);
 		setColumColor(1,col,2,0,1);
 		setColumColor(2,col,2,6,0);
-		setColumColor(3,col,1,3,3);
-		setColumColor(4,col,5,0,2);
-		setColumColor(5,col,5,0,2);
-
-		a++; b++;
-		if(a>7) a=4;
-		if(b>8) b=2;
+		}
+*/
 
 
 
@@ -285,7 +289,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 90;
+  RCC_OscInitStruct.PLL.PLLN = 52;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
@@ -300,10 +304,10 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -331,14 +335,14 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
-  hadc1.Init.ContinuousConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
   hadc1.Init.NbrOfConversion = 1;
-  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
@@ -396,6 +400,21 @@ static void MX_UART4_Init(void)
   {
     Error_Handler();
   }
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA2_Stream0_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
 }
 
