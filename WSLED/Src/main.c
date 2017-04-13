@@ -43,13 +43,14 @@ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
 SPI_HandleTypeDef hspi2;
+DMA_HandleTypeDef hdma_spi2_tx;
 
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define LED_COUNT 27
-#define COLOR_COUNT 27*3
+#define LED_COUNT 45
+#define COLOR_COUNT 45*3
 static uint8_t colors[COLOR_COUNT];
 
 uint16_t ADC_raw;
@@ -57,7 +58,7 @@ uint16_t erosites;
 uint8_t printbuffer[50];
 uint8_t adc_flag = 0;
 
-uint16_t adcValue[1024];
+uint16_t adcValue[256];
 
 
 /* USER CODE END PV */
@@ -73,45 +74,69 @@ static void MX_UART4_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void spidmacallback(DMA_HandleTypeDef* dhandle);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
 
-/*
+void spidmacallback(DMA_HandleTypeDef* dhandle){
+	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
+
+}
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC)) {
+	/*if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC)) {
 
 		ADC_raw = HAL_ADC_GetValue(hadc);
 		erosites = (ADC_raw - 1700) * 6 ;
 		adc_flag = 1;
 
-	}
+	}*/
+
+   	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	//HAL_ADC_Start_DMA(&hadc1,adcValue,256);
+
+}
+
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+}
+
+
+/*
+void ADC_DMAConvCplt(DMA_HandleTypeDef *hdma){
+
+
+
 }
 */
 
-
-
 void writeLed() {
-	uint16_t res = 500;
+	uint16_t res = 50;
 
-	uint8_t temp[COLOR_COUNT * 8 +res];
+	uint16_t temp[COLOR_COUNT *8 +res+20];
 	uint16_t i, j, k ;
-	for (i = 0; i < COLOR_COUNT; i++) {
 
+	for(k=0 ; k<20; k++){
+		temp[k]=0b0000000000000000;
+	}
+
+	for (i = 00; i < COLOR_COUNT; i++) {
 		for (j = 0; j < 8; j++) {
-			if ((colors[i] & (128 >> j)) != 0) {
-				temp[i * 8 + j] = 0b11111000;
+			if ((colors[i] & (127 >> j)) != 0) {
+				temp[i * 8 + j+20] = 0b1111111110000000;
 			} else
-				temp[i * 8 + j] = 0b11000000;
+				temp[i * 8 + j+20] = 0b1111100000000000;
 		}
 	}
 
-for(k=COLOR_COUNT*8 ; k<COLOR_COUNT*8 +res; k++){
-	temp[k]=0b00000000;
+for(k=COLOR_COUNT*8+20 ; k<COLOR_COUNT*8 +res+20; k++){
+	temp[k]=0b0000000000000000;
 }
 
-	HAL_SPI_Transmit(&hspi2,temp,COLOR_COUNT*8+res,COLOR_COUNT*8*1000000);
+	HAL_SPI_Transmit_DMA(&hspi2,temp,COLOR_COUNT*8+res+20);
+	//HAL_SPI_Transmit(&hspi2,temp,COLOR_COUNT*8+res,COLOR_COUNT*8*1000000);
 
 
 }
@@ -212,10 +237,12 @@ int main(void)
   MX_UART4_Init();
 
   /* USER CODE BEGIN 2 */
-
-  	   HAL_ADC_Start_DMA(&hadc1, adcValue, 1024);
+  HAL_DMA_RegisterCallback(&hdma_spi2_tx,HAL_DMA_XFER_CPLT_CB_ID, spidmacallback);
+ 	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
 
   	  setColor(0,0,0);
+
+
 
 
   /* USER CODE END 2 */
@@ -228,10 +255,17 @@ int main(void)
   /* USER CODE BEGIN 3 */
 
 		HAL_Delay(100);
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
-		setColor(0,0,2);
+
+		setColor(0,0,64);
+		//__disable_irq();
+
+		HAL_ADC_Stop_DMA(&hadc1);
+
 		writeLed();
+
+
+		//__enable_irq();
 
 		//resetLed();
 
@@ -289,7 +323,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 52;
+  RCC_OscInitStruct.PLL.PLLN = 51;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 2;
   RCC_OscInitStruct.PLL.PLLR = 2;
@@ -368,11 +402,11 @@ static void MX_SPI2_Init(void)
   hspi2.Instance = SPI2;
   hspi2.Init.Mode = SPI_MODE_MASTER;
   hspi2.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.DataSize = SPI_DATASIZE_16BIT;
   hspi2.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi2.Init.NSS = SPI_NSS_SOFT;
-  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
   hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -410,8 +444,12 @@ static void MX_DMA_Init(void)
 {
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);

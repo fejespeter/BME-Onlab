@@ -1,0 +1,11 @@
+main.c:82:6:spidmacallback	0	static
+main.c:87:6:HAL_ADC_ConvCpltCallback	0	static
+main.c:101:6:HAL_ADC_ConvHalfCpltCallback	0	static
+main.c:115:6:writeLed	2336	dynamic,bounded
+main.c:144:6:resetLed	512	static
+main.c:157:6:setColor	20	static
+main.c:178:6:setLedColorAt	16	static
+main.c:188:6:setColumColor	20	static
+main.c:306:6:SystemClock_Config	96	static
+main.c:215:5:main	56	static
+main.c:514:6:Error_Handler	0	static

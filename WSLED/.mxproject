@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=C:/Users/Fejes/Downloads/BME-Onlab-master/BME-Onlab-master/WSLED/Inc
+HeaderPath=F:/GitHub/BME-Onlab/BME-Onlab/WSLED/Inc
 HeaderFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;
-SourcePath=C:/Users/Fejes/Downloads/BME-Onlab-master/BME-Onlab-master/WSLED/Src
+SourcePath=F:/GitHub/BME-Onlab/BME-Onlab/WSLED/Src
 SourceFiles=stm32f4xx_it.h;stm32f4xx_hal_conf.h;main.h;stm32f4xx_it.c;stm32f4xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
