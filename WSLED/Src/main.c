@@ -51,14 +51,15 @@ UART_HandleTypeDef huart4;
 /* Private variables ---------------------------------------------------------*/
 #define LED_COUNT 36
 #define COLOR_COUNT LED_COUNT*3
+#define ADC_COUNT 256
 static uint8_t colors[COLOR_COUNT];
 
-uint16_t ADC_raw;
-uint16_t erosites;
 uint8_t printbuffer[50];
 uint8_t adc_flag = 0;
 
-uint16_t adcValue[256];
+uint16_t adcValue[ADC_COUNT];
+uint16_t adcValueAmpfiled[ADC_COUNT];
+
 
 
 /* USER CODE END PV */
@@ -81,23 +82,33 @@ void spidmacallback(DMA_HandleTypeDef* dhandle);
 
 void spidmacallback(DMA_HandleTypeDef* dhandle){
 	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
-
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
 
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
-	/*if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_EOC)) {
 
-		ADC_raw = HAL_ADC_GetValue(hadc);
-		erosites = (ADC_raw - 1700) * 6 ;
-		adc_flag = 1;
+void adcdmacallback(DMA_HandleTypeDef* dhandle){
+	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
-	}*/
+	for(uint16_t i = 0; i<ADC_COUNT; i++)
+	{
+		uint16_t adc_value_ampfiled = 3;
 
-   	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	//HAL_ADC_Start_DMA(&hadc1,adcValue,256);
+		if(adcValue[i]<1800){
+			adc_value_ampfiled = 2;
+		}
+		if(adcValue[i]>2200){
+					adc_value_ampfiled = 4096;
+		}
+		if(adcValue[i]>1799 && adcValue[i]<2201){
+					adc_value_ampfiled = (adcValue[i]*10)-18000 ;
+		}
+
+		adcValueAmpfiled[i]=adc_value_ampfiled;
+
+	}
+
 
 }
-
 
 
 void writeLed() {
@@ -242,7 +253,6 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-		HAL_Delay(100);
 
 
 		setColor(0,0,0);
@@ -256,31 +266,17 @@ int main(void)
 
 		writeLed();
 
+		HAL_Delay(100);
+		spidmacallback(&hdma_adc1);
+
+
+	 	HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
+
+
+		//HAL_UART_Transmit(&huart4, printbuffer, strlen(printbuffer), 5000);
 
 
 
-/*
-		if (adc_flag == 1) {
-			adc_flag = 0;
-			sprintf(printbuffer, "AD=%d\r\n", erosites/360);
-
-			HAL_UART_Transmit(&huart4, printbuffer, strlen(printbuffer), 5000);
-
-
-		}
-
-
-		HAL_ADC_Start_IT(&hadc1);
-
-
-		int col = 5;
-
-		if(col>0 && col<10){
-		setColumColor(0,col,0,0,5);
-		setColumColor(1,col,2,0,1);
-		setColumColor(2,col,2,6,0);
-		}
-*/
 
 
 
@@ -432,8 +428,8 @@ static void MX_UART4_Init(void)
 static void MX_DMA_Init(void) 
 {
   /* DMA controller clock enable */
-  __HAL_RCC_DMA2_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Stream4_IRQn interrupt configuration */
