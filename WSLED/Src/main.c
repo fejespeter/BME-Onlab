@@ -54,12 +54,14 @@ UART_HandleTypeDef huart4;
 #define ADC_COUNT 256
 static uint8_t colors[COLOR_COUNT];
 
+
 uint8_t printbuffer[50];
 uint8_t adc_flag = 0;
 
 uint16_t adcValue[ADC_COUNT];
 uint16_t adcValueAmpfiled[ADC_COUNT];
 
+uint16_t colheight ;
 
 
 /* USER CODE END PV */
@@ -110,6 +112,17 @@ void adcdmacallback(DMA_HandleTypeDef* dhandle){
 
 }
 
+uint16_t getcolumnheight(){
+	uint32_t sum = 0 ;
+	for(uint16_t i = 0 ; i < ADC_COUNT ; i++){
+		sum = sum + adcValueAmpfiled[i];
+	}
+
+	sum = sum / ADC_COUNT;
+	sum = sum / 444;
+
+	return sum;
+}
 
 void writeLed() {
 	uint16_t res = 50;
@@ -254,24 +267,26 @@ int main(void)
   /* USER CODE BEGIN 3 */
 
 
-
-		setColor(0,0,0);
-		setColumColor(0,5,0,0,2);
-		setColumColor(1,5,0,0,3);
-		setColumColor(2,5,0,0,4);
-		setColumColor(3,5,0,0,5);
-
-
 		HAL_ADC_Stop_DMA(&hadc1);
+
+		adcdmacallback(&hdma_adc1);
+		colheight = 0;
+		colheight = getcolumnheight();
+
+		setColumColor(0,colheight,0,0,2);
+		setColumColor(1,colheight,0,0,3);
+		setColumColor(2,colheight,0,0,4);
+		setColumColor(3,colheight,0,0,5);
 
 		writeLed();
 
 		HAL_Delay(100);
-		spidmacallback(&hdma_adc1);
+
 
 
 	 	HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
 
+		HAL_Delay(100);
 
 		//HAL_UART_Transmit(&huart4, printbuffer, strlen(printbuffer), 5000);
 
