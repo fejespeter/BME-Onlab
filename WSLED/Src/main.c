@@ -49,8 +49,8 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define LED_COUNT 45
-#define COLOR_COUNT 45*3
+#define LED_COUNT 36
+#define COLOR_COUNT LED_COUNT*3
 static uint8_t colors[COLOR_COUNT];
 
 uint16_t ADC_raw;
@@ -98,19 +98,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc) {
 
 }
 
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-}
 
-
-/*
-void ADC_DMAConvCplt(DMA_HandleTypeDef *hdma){
-
-
-
-}
-*/
 
 void writeLed() {
 	uint16_t res = 50;
@@ -122,9 +110,9 @@ void writeLed() {
 		temp[k]=0b0000000000000000;
 	}
 
-	for (i = 00; i < COLOR_COUNT; i++) {
+	for (i = 0 ; i < COLOR_COUNT; i++) {
 		for (j = 0; j < 8; j++) {
-			if ((colors[i] & (127 >> j)) != 0) {
+			if ((colors[i] & (128 >> j)) != 0) {
 				temp[i * 8 + j+20] = 0b1111111110000000;
 			} else
 				temp[i * 8 + j+20] = 0b1111100000000000;
@@ -237,7 +225,7 @@ int main(void)
   MX_UART4_Init();
 
   /* USER CODE BEGIN 2 */
-  HAL_DMA_RegisterCallback(&hdma_spi2_tx,HAL_DMA_XFER_CPLT_CB_ID, spidmacallback);
+  	  HAL_DMA_RegisterCallback(&hdma_spi2_tx,HAL_DMA_XFER_CPLT_CB_ID, spidmacallback);
  	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
 
   	  setColor(0,0,0);
@@ -257,17 +245,18 @@ int main(void)
 		HAL_Delay(100);
 
 
-		setColor(0,0,64);
-		//__disable_irq();
+		setColor(0,0,0);
+		setColumColor(0,5,0,0,2);
+		setColumColor(1,5,0,0,3);
+		setColumColor(2,5,0,0,4);
+		setColumColor(3,5,0,0,5);
+
 
 		HAL_ADC_Stop_DMA(&hadc1);
 
 		writeLed();
 
 
-		//__enable_irq();
-
-		//resetLed();
 
 
 /*
