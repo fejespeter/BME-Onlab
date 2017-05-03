@@ -49,9 +49,9 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define LED_COUNT 36
+#define LED_COUNT 54
 #define COLOR_COUNT LED_COUNT*3
-#define ADC_COUNT 256
+#define ADC_COUNT 1024
 static uint8_t colors[COLOR_COUNT];
 
 
@@ -62,6 +62,7 @@ uint16_t adcValue[ADC_COUNT];
 uint16_t adcValueAmpfiled[ADC_COUNT];
 
 uint16_t colheight ;
+uint16_t adc_value_min = 2000;
 
 
 /* USER CODE END PV */
@@ -77,40 +78,14 @@ static void MX_UART4_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-void spidmacallback(DMA_HandleTypeDef* dhandle);
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
 
-void spidmacallback(DMA_HandleTypeDef* dhandle){
-	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-}
 
 
-void adcdmacallback(DMA_HandleTypeDef* dhandle){
-	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
-	for(uint16_t i = 0; i<ADC_COUNT; i++)
-	{
-		uint16_t adc_value_ampfiled = 3;
-
-		if(adcValue[i]<1800){
-			adc_value_ampfiled = 2;
-		}
-		if(adcValue[i]>2200){
-					adc_value_ampfiled = 4096;
-		}
-		if(adcValue[i]>1799 && adcValue[i]<2201){
-					adc_value_ampfiled = (adcValue[i]*10)-18000 ;
-		}
-
-		adcValueAmpfiled[i]=adc_value_ampfiled;
-
-	}
-
-
-}
 
 uint16_t getcolumnheight(){
 	uint32_t sum = 0 ;
@@ -222,6 +197,59 @@ void setColumColor(int index,int full,uint8_t g, uint8_t r, uint8_t b)
 
 }
 
+void fft_transform(){
+	adc_value_min = 2000;
+	for(uint16_t i = 0; i<ADC_COUNT; i++)
+		{
+			uint16_t adc_value_ampfiled = 3;
+
+
+			if(adcValue[i]<adc_value_min){
+				adc_value_min = adcValue[i];
+			}
+
+			if(adcValue[i]<1850){
+				adc_value_ampfiled = 2;
+			}
+			if(adcValue[i]>2200){
+						adc_value_ampfiled = 4096;
+			}
+			if(adcValue[i]>1849 && adcValue[i]<2201){
+						adc_value_ampfiled = (adcValue[i]*12)-22200 ;
+			}
+
+			adcValueAmpfiled[i]=adc_value_ampfiled;
+		}
+
+	colheight = getcolumnheight();
+	if(colheight > 2){
+		colheight = colheight -2;
+	}
+	setColumColor(0,colheight,2,0,2);
+	setColumColor(1,colheight,2,0,1);
+	setColumColor(2,colheight,2,0,4);
+	setColumColor(3,colheight,2,0,1);
+	setColumColor(4,colheight,2,0,1);
+	setColumColor(5,colheight,2,0,1);
+
+	//setColor(2,0,1);
+	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
+
+	HAL_ADC_Start_DMA(&hadc1, adcValue, ADC_COUNT);
+
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
+	HAL_ADC_Stop_DMA(&hadc1);
+	writeLed();
+	fft_transform();
+
+}
+
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -249,9 +277,8 @@ int main(void)
   MX_UART4_Init();
 
   /* USER CODE BEGIN 2 */
-  	  HAL_DMA_RegisterCallback(&hdma_spi2_tx,HAL_DMA_XFER_CPLT_CB_ID, spidmacallback);
- 	  HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
-
+  	  //HAL_DMA_RegisterCallback(&hdma_spi2_tx,HAL_DMA_XFER_CPLT_CB_ID, spidmacallback);
+  	  HAL_ADC_Start_DMA(&hadc1, adcValue, ADC_COUNT);
   	  setColor(0,0,0);
 
 
@@ -266,33 +293,8 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-
-		HAL_ADC_Stop_DMA(&hadc1);
-
-		adcdmacallback(&hdma_adc1);
-		colheight = 0;
-		colheight = getcolumnheight();
-
-		setColumColor(0,colheight,0,0,2);
-		setColumColor(1,colheight,0,0,3);
-		setColumColor(2,colheight,0,0,4);
-		setColumColor(3,colheight,0,0,5);
-
-		writeLed();
-
-		HAL_Delay(100);
-
-
-
-	 	HAL_ADC_Start_DMA(&hadc1, adcValue, 256);
-
-		HAL_Delay(100);
-
+		//sprintf(printbuffer, "AD=%d\r\n", erosites/360);
 		//HAL_UART_Transmit(&huart4, printbuffer, strlen(printbuffer), 5000);
-
-
-
-
 
 
 
@@ -443,8 +445,8 @@ static void MX_UART4_Init(void)
 static void MX_DMA_Init(void) 
 {
   /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Stream4_IRQn interrupt configuration */

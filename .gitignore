@@ -3,3 +3,6 @@
 WSLED/Debug/WSLED.elf.list
 WSLED/Debug/WSLED.map
 *.xml
+*.mxproject
+*.xml
+*.launch
