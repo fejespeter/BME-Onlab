@@ -226,11 +226,11 @@ void fft_transform(){
 		colheight = colheight -2;
 	}
 	setColumColor(0,colheight,2,0,2);
-	setColumColor(1,colheight,2,0,1);
-	setColumColor(2,colheight,2,0,4);
-	setColumColor(3,colheight,2,0,1);
-	setColumColor(4,colheight,2,0,1);
-	setColumColor(5,colheight,2,0,1);
+	setColumColor(1,colheight,2,0,2);
+	setColumColor(2,colheight,2,0,2);
+	setColumColor(3,colheight,2,0,2);
+	setColumColor(4,colheight,2,0,2);
+	setColumColor(5,colheight,2,0,2);
 
 	//setColor(2,0,1);
 	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
