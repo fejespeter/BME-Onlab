@@ -49,7 +49,7 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-#define LED_COUNT 54
+#define LED_COUNT 84
 #define COLOR_COUNT LED_COUNT*3
 #define ADC_COUNT 1024
 static uint8_t colors[COLOR_COUNT];
@@ -172,6 +172,99 @@ void setLedColorAt(int index,uint8_t g, uint8_t r, uint8_t b)
 	  colors[(index*3)+2] = b;
 }
 
+
+void setColumColorNewPanel(int index,int fill,uint8_t g, uint8_t r, uint8_t b)
+{
+	uint8_t t = 0;
+	if(t<fill)
+	{
+		colors[0+(index*3)] = g;
+		colors[1+(index*3)] = r;
+		colors[2+(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[0+(index*3)] = 0;
+		colors[1+(index*3)] = 0;
+		colors[2+(index*3)] = 0;
+	}
+
+	if(t<fill)
+	{
+		colors[(27*3)+0-(index*3)] = g;
+		colors[(27*3)+1-(index*3)] = r;
+		colors[(27*3)+2-(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[(27*3)+0-(index*3)] = 0;
+		colors[(27*3)+1-(index*3)] = 0;
+		colors[(27*3)+2-(index*3)] = 0;
+	}
+
+	if(t<fill)
+	{
+		colors[(28*3)+0+(index*3)] = g;
+		colors[(28*3)+1+(index*3)] = r;
+		colors[(28*3)+2+(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[(28*3)+0+(index*3)] = 0;
+		colors[(28*3)+1+(index*3)] = 0;
+		colors[(28*3)+2+(index*3)] = 0;
+	}
+
+	if(t<fill)
+	{
+		colors[(55*3)+0-(index*3)] = g;
+		colors[(55*3)+1-(index*3)] = r;
+		colors[(55*3)+2-(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[(55*3)+0-(index*3)] = 0;
+		colors[(55*3)+1-(index*3)] = 0;
+		colors[(55*3)+2-(index*3)] = 0;
+	}
+
+	if(t<fill)
+	{
+		colors[(56*3)+0+(index*3)] = g;
+		colors[(56*3)+1+(index*3)] = r;
+		colors[(56*3)+2+(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[(56*3)+0+(index*3)] = 0;
+		colors[(56*3)+1+(index*3)] = 0;
+		colors[(56*3)+2+(index*3)] = 0;
+	}
+
+
+	if(t<fill)
+	{
+		colors[(83*3)+0-(index*3)] = g;
+		colors[(83*3)+1-(index*3)] = r;
+		colors[(83*3)+2-(index*3)] = b;
+		t++;
+	}
+	else
+	{
+		colors[(83*3)+0-(index*3)] = 0;
+		colors[(83*3)+1-(index*3)] = 0;
+		colors[(83*3)+2-(index*3)] = 0;
+	}
+
+
+}
+
+
 void setColumColor(int index,int full,uint8_t g, uint8_t r, uint8_t b)
 {
 	int act = 0;
@@ -221,19 +314,51 @@ void fft_transform(){
 			adcValueAmpfiled[i]=adc_value_ampfiled;
 		}
 
+
+
+
 	colheight = getcolumnheight();
 	if(colheight > 2){
-		colheight = colheight -2;
+		colheight = colheight -3;
 	}
+
+	setColumColorNewPanel(0,colheight+1,0,0,8);
+	setColumColorNewPanel(1,colheight,0,2,8);
+
+	setColumColorNewPanel(2,colheight-1,0,4,8);
+	setColumColorNewPanel(3,(colheight-2)*1.5,0,6,8);
+
+	setColumColorNewPanel(4,(colheight-2)*2,0,10,8);
+	setColumColorNewPanel(5,colheight-1,0,15,8);
+
+	setColumColorNewPanel(6,colheight+1,0,18,5);
+	setColumColorNewPanel(7,colheight+1,0,18,5);
+
+	setColumColorNewPanel(8,colheight-1,0,15,8);
+	setColumColorNewPanel(9,(colheight-2)*2,0,10,8);
+
+	setColumColorNewPanel(10,(colheight-2)*1.5,0,6,8);
+	setColumColorNewPanel(11,colheight-1,0,4,8);
+
+	setColumColorNewPanel(12,colheight,0,2,8);
+	setColumColorNewPanel(13,colheight+1,0,0,8);
+
+/*
 	setColumColor(0,colheight,2,0,2);
+
 	setColumColor(1,colheight,2,0,2);
 	setColumColor(2,colheight,2,0,2);
 	setColumColor(3,colheight,2,0,2);
 	setColumColor(4,colheight,2,0,2);
 	setColumColor(5,colheight,2,0,2);
+*/
+
 
 	//setColor(2,0,1);
 	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+
+
+
 }
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
