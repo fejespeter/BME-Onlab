@@ -56,6 +56,7 @@ UART_HandleTypeDef huart4;
 #define ADC_COUNT 1024
 static uint8_t colors[COLOR_COUNT];
 
+uint8_t mode = 0;
 
 uint8_t printbuffer[50];
 uint8_t adc_flag = 0;
@@ -121,9 +122,9 @@ void writeLed() {
 		}
 	}
 
-for(k=COLOR_COUNT*8+20 ; k<COLOR_COUNT*8 +res+20; k++){
-	temp[k]=0b0000000000000000;
-}
+	for(k=COLOR_COUNT*8+20 ; k<COLOR_COUNT*8 +res+20; k++){
+		temp[k]=0b0000000000000000;
+	}
 
 	HAL_SPI_Transmit_DMA(&hspi2,temp,COLOR_COUNT*8+res+20);
 	//HAL_SPI_Transmit(&hspi2,temp,COLOR_COUNT*8+res,COLOR_COUNT*8*1000000);
@@ -358,7 +359,8 @@ void fft_transform(){
 
 
 	//setColor(2,0,1);
-	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+
+	//HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
 
 
@@ -366,17 +368,49 @@ void fft_transform(){
 
 void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi){
 
-	HAL_ADC_Start_DMA(&hadc1, adcValue, ADC_COUNT);
+	GPIO_PinState buttonState = HAL_GPIO_ReadPin(B1_GPIO_Port,B1_Pin);
+	if(buttonState == GPIO_PIN_RESET){
+		if(mode==1){
+			mode=0;
+		}
+		else{
+			mode=1;
+		}
+		HAL_GPIO_WritePin(B1_GPIO_Port,B1_Pin,GPIO_PIN_SET);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	}
 
+	if(mode==0){
+		HAL_ADC_Start_DMA(&hadc1, adcValue, ADC_COUNT);
+	}
+	if(mode==1){
+		HAL_ADC_Start_DMA(&hadc2, adcValue, ADC_COUNT);
+	}
+	//HAL_ADC_Start_DMA(&hadc2, adcValue, ADC_COUNT);
 }
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc){
-	HAL_ADC_Stop_DMA(&hadc1);
+/*
+	HAL_ADC_Stop_DMA(&hadc2);
+	writeLed();
+	fft_transform();
+*/
+
+
+	if(mode==0){
+		HAL_ADC_Stop_DMA(&hadc1);
+	}
+	if(mode==1){
+		HAL_ADC_Stop_DMA(&hadc2);
+	}
 	writeLed();
 	fft_transform();
 
 }
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+}
 
 /* USER CODE END 0 */
 
@@ -422,7 +456,7 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 
-		//sprintf(printbuffer, "AD=%d\r\n", erosites/360);
+		//sprintf(printbuffer, "AD=%d\r\n", 300);
 		//HAL_UART_Transmit(&huart4, printbuffer, strlen(printbuffer), 5000);
 
 
