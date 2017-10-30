@@ -36,6 +36,8 @@
 
 /* USER CODE BEGIN Includes */
 
+#include "arm_math.h"
+
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -55,6 +57,7 @@ UART_HandleTypeDef huart4;
 #define COLOR_COUNT LED_COUNT*3
 #define ADC_COUNT 1024
 static uint8_t colors[COLOR_COUNT];
+
 
 uint8_t mode = 0;
 
@@ -104,6 +107,7 @@ uint16_t getcolumnheight(){
 }
 
 void writeLed() {
+	arm_rfft_fast_f32()
 	uint16_t res = 50;
 
 	uint16_t temp[COLOR_COUNT *8 +res+20];
@@ -319,6 +323,8 @@ void fft_transform(){
 		}
 
 
+
+	arm_rfft_fast_f32();
 
 
 	colheight = getcolumnheight();

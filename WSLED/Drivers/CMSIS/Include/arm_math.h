@@ -287,6 +287,7 @@
  */
 #ifndef _ARM_MATH_H
 #define _ARM_MATH_H
+#define ARM_MATH_CM4
 
 /* ignore some GCC warnings */
 #if defined ( __GNUC__ )
