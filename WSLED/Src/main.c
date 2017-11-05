@@ -35,7 +35,7 @@
 #include "stm32f4xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#define ARM_MATH_CM4
 #include "arm_math.h"
 
 /* USER CODE END Includes */
@@ -69,6 +69,8 @@ uint16_t adcValueAmpfiled[ADC_COUNT];
 
 uint16_t colheight ;
 uint16_t adc_value_min = 2000;
+
+arm_cfft_radix4_instance_f32 S;
 
 
 /* USER CODE END PV */
@@ -107,7 +109,7 @@ uint16_t getcolumnheight(){
 }
 
 void writeLed() {
-	arm_rfft_fast_f32()
+	//arm_rfft_fast_f32()
 	uint16_t res = 50;
 
 	uint16_t temp[COLOR_COUNT *8 +res+20];
@@ -324,7 +326,7 @@ void fft_transform(){
 
 
 
-	arm_rfft_fast_f32();
+	//arm_rfft_fast_f32();
 
 
 	colheight = getcolumnheight();
@@ -451,7 +453,7 @@ int main(void)
   	  setColor(0,0,0);
 
 
-
+  	arm_cfft_radix4_init_f32(&S, ADC_COUNT, 0, 1);
 
   /* USER CODE END 2 */
 
