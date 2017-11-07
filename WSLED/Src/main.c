@@ -58,6 +58,9 @@ UART_HandleTypeDef huart4;
 #define ADC_COUNT 1024
 static uint8_t colors[COLOR_COUNT];
 
+float32_t fft_input[ADC_COUNT*2];
+float32_t fft_output[ADC_COUNT];
+
 
 uint8_t mode = 0;
 
@@ -322,11 +325,14 @@ void fft_transform(){
 			}
 
 			adcValueAmpfiled[i]=adc_value_ampfiled;
+			fft_input[i*2]=(float32_t)adc_value_ampfiled;
+			fft_input[(i*2)+1]=0;
 		}
 
 
 
-	//arm_rfft_fast_f32();
+	arm_cfft_radix4_f32(&S,fft_input);
+	arm_cmplx_mag_f32(fft_input, fft_output, ADC_COUNT);
 
 
 	colheight = getcolumnheight();
