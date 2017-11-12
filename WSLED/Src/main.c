@@ -60,6 +60,8 @@ static uint8_t colors[COLOR_COUNT];
 
 float32_t fft_input[ADC_COUNT*2];
 float32_t fft_output[ADC_COUNT];
+float32_t avgvalue[14];
+uint8_t colheights[14];
 
 
 uint8_t mode = 0;
@@ -99,8 +101,25 @@ static void MX_ADC2_Init(void);
 
 
 
-uint16_t getcolumnheight(){
-	uint32_t sum = 0 ;
+uint16_t getcolumnheight(uint8_t col){
+
+	float32_t colh = avgvalue[col];
+
+	colh = (col - 2000 ) / 2000 ;
+
+	uint16_t colheight = (uint16_t)colh;
+
+	if(colheight >6){
+		colheight = 6;
+	}
+	if(colheight <1){
+		colheight =1;
+	}
+
+	return colheight;
+
+
+	/*uint32_t sum = 0 ;
 	for(uint16_t i = 0 ; i < ADC_COUNT ; i++){
 		sum = sum + adcValueAmpfiled[i];
 	}
@@ -108,7 +127,7 @@ uint16_t getcolumnheight(){
 	sum = sum / ADC_COUNT;
 	sum = sum / 444;
 
-	return sum;
+	return sum;*/
 }
 
 void writeLed() {
@@ -334,32 +353,49 @@ void fft_transform(){
 	arm_cfft_radix4_f32(&S,fft_input);
 	arm_cmplx_mag_f32(fft_input, fft_output, ADC_COUNT);
 
+	for(uint8_t i = 0; i<14;i++){
+		float32_t sum = 0;
+		for(uint8_t j = 0; j<69 ; j++){
+			 sum += fft_output[j+(i*69)+55];
+		}
+		sum = sum/69;
+		avgvalue[i]=sum;
 
-	colheight = getcolumnheight();
-	if(colheight > 2){
-		colheight = colheight -3;
+		avgvalue[i] = (avgvalue[i]-500) / 750;
+
 	}
 
-	setColumColorNewPanel(0,colheight+1,0,0,8);
-	setColumColorNewPanel(1,colheight,0,2,8);
+	for(uint8_t i = 0; i<14;i++){
+		colheights[i] = (uint8_t) avgvalue[i];
 
-	setColumColorNewPanel(2,colheight-1,0,4,8);
-	setColumColorNewPanel(3,(colheight-2)*1.5,0,6,8);
+		if(colheights[i] >6){
+			colheights[i] =6;
+		}
+		if(colheights[i] <0){
+			colheights[i] =0;
+		}
+	}
 
-	setColumColorNewPanel(4,(colheight-2)*2,0,10,8);
-	setColumColorNewPanel(5,colheight-1,0,15,8);
+	setColumColorNewPanel(0,colheights[0],0,0,8);
+	setColumColorNewPanel(1,colheights[1],0,2,8);
 
-	setColumColorNewPanel(6,colheight+1,0,18,5);
-	setColumColorNewPanel(7,colheight+1,0,18,5);
+	setColumColorNewPanel(2,colheights[2],0,4,8);
+	setColumColorNewPanel(3,colheights[3],0,6,8);
 
-	setColumColorNewPanel(8,colheight-1,0,15,8);
-	setColumColorNewPanel(9,(colheight-2)*2,0,10,8);
+	setColumColorNewPanel(4,colheights[4],0,10,8);
+	setColumColorNewPanel(5,colheights[5],0,15,8);
 
-	setColumColorNewPanel(10,(colheight-2)*1.5,0,6,8);
-	setColumColorNewPanel(11,colheight-1,0,4,8);
+	setColumColorNewPanel(6,colheights[6],0,18,5);
+	setColumColorNewPanel(7,colheights[7],0,18,5);
 
-	setColumColorNewPanel(12,colheight,0,2,8);
-	setColumColorNewPanel(13,colheight+1,0,0,8);
+	setColumColorNewPanel(8,colheights[8],0,15,8);
+	setColumColorNewPanel(9,colheights[9],0,10,8);
+
+	setColumColorNewPanel(10,colheights[10],0,6,8);
+	setColumColorNewPanel(11,colheights[11],0,4,8);
+
+	setColumColorNewPanel(12,colheights[12],0,2,8);
+	setColumColorNewPanel(13,colheights[13],0,0,8);
 
 /*
 	setColumColor(0,colheight,2,0,2);
