@@ -355,13 +355,14 @@ void fft_transform(){
 
 	for(uint8_t i = 0; i<14;i++){
 		float32_t sum = 0;
-		for(uint8_t j = 0; j<69 ; j++){
-			 sum += fft_output[j+(i*69)+55];
+		for(uint8_t j = 0; j<65 ; j++){
+			 sum += fft_output[j+(i*65)+112];
 		}
-		sum = sum/69;
+		sum = sum/65;
+
 		avgvalue[i]=sum;
 
-		avgvalue[i] = (avgvalue[i]-500) / 750;
+		avgvalue[i] = (avgvalue[i]-900) / 500;
 
 	}
 
