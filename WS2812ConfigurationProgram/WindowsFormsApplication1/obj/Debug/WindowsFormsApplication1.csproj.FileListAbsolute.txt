@@ -7,3 +7,12 @@ E:\Programozás\Drive\Programozás\VisualStudio\WindowsFormsApplication1\Windows
 E:\Programozás\Drive\Programozás\VisualStudio\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
 E:\Programozás\Drive\Programozás\VisualStudio\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
 E:\Programozás\Drive\Programozás\VisualStudio\WindowsFormsApplication1\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.exe
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.pdb
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.pdb
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csprojResolveAssemblyReference.cache
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Form1.resources
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.Properties.Resources.resources
+E:\Programozas\Github\BME-Onlab\WS2812ConfigurationProgram\WindowsFormsApplication1\obj\Debug\WindowsFormsApplication1.csproj.GenerateResource.Cache
